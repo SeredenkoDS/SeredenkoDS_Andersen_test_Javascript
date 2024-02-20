@@ -1,0 +1,102 @@
+<html><head>
+<title>Andersen Test</title>
+<style>
+#rslt {margin-top: 20px;}
+</style></head>
+<body>
+<script>
+function fixBrackets(value) {
+	let openingBrackets = ["[", "(", "{"];
+	let closingBrackets = ["]", ")", "}"];
+	let accountedFor = new Array(value.length).fill(0);
+	let i = 0;
+	while (i < value.length) {
+		if (closingBrackets.includes(value[i]) && accountedFor[i] == 0) {
+			let pairedIndex = -1;
+			for (let j = i - 1; j >= 0; j--) {
+				if (accountedFor[j] == 0) {
+					pairedIndex = j;
+					break;
+				}
+			}
+			if (pairedIndex >= 0) {
+				if (openingBrackets.indexOf(value[pairedIndex]) == closingBrackets.indexOf(value[i])) {
+					accountedFor[i] = 1;
+					accountedFor[pairedIndex] = 1;
+				} else {
+					accountedFor[i] = 1;
+					value = value.slice(0, pairedIndex + 1) + openingBrackets[closingBrackets.indexOf(value[i])] + value.slice(pairedIndex + 1);
+					accountedFor = [
+						...accountedFor.slice(0, pairedIndex + 1),
+						1,
+						...accountedFor.slice(pairedIndex + 1)
+					];
+				}
+			} else {
+				accountedFor[i] = 1;
+				value = openingBrackets[closingBrackets.indexOf(value[i])] + value;
+				accountedFor = [
+					1,
+					...accountedFor.slice()
+				];
+			}
+		}
+		i += 1;
+	}
+	for (i = value.length; i >= 0; i--) {
+		if (accountedFor[i] == 0) {
+			value += closingBrackets[openingBrackets.indexOf(value[i])];
+		}
+	}
+	return value;
+}
+function processInput() {
+	let txt = document.getElementById("inp").value;
+	let rslt = document.getElementById("rslt");
+	if (txt == "") {
+		rslt.innerHTML = "Result would be here";
+	} else if (isNaN(txt)) {
+		if (txt.startsWith("N:")) {
+			let numbers = txt.substring(2).split(/\s+/).filter(element => element !== '');
+			let numbers_processed = "Resulting numbers:"
+			for (let i = 0; i < numbers.length; i++) {
+				if (!isNaN(numbers[i])) {
+					if (Number(numbers[i]) % 3 == 0) {
+						numbers_processed += " " + numbers[i];
+					}
+				}
+			}
+			if (numbers_processed == "Resulting numbers:") {
+				numbers_processed = "Resulting numbers: none";
+			}
+			rslt.innerHTML = numbers_processed;
+		} else if (txt.startsWith("B:")) {
+			let brackets = txt.substring(2).split("").filter(element => ["[", "]", "(", ")", "{", "}"].includes(element));
+			rslt.innerHTML = "Fixed brackets: " + fixBrackets(brackets.join(""));
+		} else {
+			if (txt == "John") {
+				rslt.innerHTML = "Hello, John";
+			} else {
+				rslt.innerHTML = "There is no such name";
+			}
+		}
+	} else {
+		if (Number(txt) > 7) {
+			rslt.innerHTML = "Hello";
+		} else {
+			rslt.innerHTML = "Not Hello";
+		}
+	}
+}
+</script>
+<div>
+Per task requirements:<br/>
+1) If a number is entered, the output is "Hello" if it's bigger than 7 (examples: 7.01, 1e9, +8), otherwise "Not Hello" (examples: -7.3, -1e9, 0, 7).<br/>
+2) If a string is entered, the output is "Hello, John" if "John" is entered, otherwise "There is no such name" (with the exceptions listed below).<br/>
+3) If input starts with "N:", then the program checks for numbers separated by spaces and only returns those that are divisible by 3. Example: "N: 1 0 -0 -3e9 three 12 13 1.4 15" would return "Resulting numbers: 0 -0 -3e9 12 15"<br/>
+4) If input starts with "B:", then the program checks for bracket symbols ()[]{} and fixes the sequence into the correct one by inserting the additional brackets as needed. <br/>Example: "B: [((())()(())]]" would return "Fixed brackets: [([[(())()(())]])]". However, if we include modifying symbols, it is possible to fix the sequence with modification of the next to last symbol like so: [((())()(()))]<br/>
+</div>
+<h2>Input stuff here:</h2>
+<input type="text" id="inp" size="50" oninput="processInput()"/>
+<div id="rslt">Result would be here</div>
+</body></html>
